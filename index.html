@@ -226,6 +226,129 @@ button { cursor: pointer; }
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
 .modal-overlay.show { display: flex; }
 .modal-card { width: min(440px, 100%); background: #fff; border-radius: 24px; padding: 28px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); }
+
+
+/* DEARLY envelope refinement — preserve the original two-step workflow */
+.field input, .field textarea { user-select: text; }
+.env-side { border-radius: 7px; }
+.env-front {
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(255,255,255,.72), transparent 52%),
+    linear-gradient(135deg, rgba(255,255,255,.14), transparent 50%),
+    var(--env-base);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.62), 0 18px 30px rgba(58,50,45,.16);
+}
+.env-front::after {
+  content: ""; position: absolute; inset: 8px; border: 1px solid rgba(125,99,71,.15);
+  border-radius: 3px; pointer-events: none; z-index: 0;
+}
+.addr-sender, .addr-recipient, .track-tag-box, .post-stamp-box { z-index: 2; }
+.addr-sender { top: 20px; left: 25px; max-width: 34%; }
+.addr-sender .title, .addr-recipient .title { letter-spacing: 1.6px; }
+.addr-sender .name { font-size: 12px; }
+.address-lines { white-space: pre-line; font-size: 10px; line-height: 1.45; color: #76695f; max-width: 100%; overflow-wrap: anywhere; }
+.sender-address-lines { margin-top: 3px; }
+.addr-recipient { top: 51%; left: 34%; right: 22%; max-width: 62%; transform: translateY(-24%); }
+.addr-recipient .title { margin-bottom: 3px; }
+.addr-recipient .name { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(17px, 2.1vw, 22px); line-height: 1.2; overflow-wrap: anywhere; }
+.recipient-address-lines { margin-top: 5px; font-size: 11px; color: #5f554e; }
+.track-tag-box { border-style: dashed; background: rgba(255,255,255,.62); }
+.post-stamp-box { border: 1px solid rgba(255,255,255,.9); outline: 1px dashed rgba(110,85,60,.35); outline-offset: 2px; }
+.env-back { overflow: visible; border-radius: 7px; background: var(--env-dark); }
+.env-back-bg {
+  border-radius: 7px;
+  background: linear-gradient(145deg, var(--env-base), var(--env-dark));
+  box-shadow: inset 0 0 0 1px rgba(123,94,62,.18), inset 0 0 28px rgba(120,87,48,.08);
+}
+/* The sheet sits behind the pocket flaps when closed and slides upward when opened. */
+.letter-sheet {
+  top: 7%; left: 9%; right: auto; bottom: auto; width: 82%; height: 82%;
+  border-radius: 3px; padding: 20px 22px;
+  transform: translateY(35%) scale(.965); opacity: 0; z-index: 2;
+  box-shadow: 0 3px 8px rgba(44,33,23,.16);
+  background: linear-gradient(145deg, rgba(255,255,255,.99), rgba(255,253,247,.99));
+  border: 1px solid rgba(130,107,82,.22);
+}
+.envelope-box-3d.open .letter-sheet {
+  transform: translateY(-20%) scale(1); opacity: 1; z-index: 10;
+  pointer-events: auto; box-shadow: 0 18px 34px rgba(44,33,23,.26);
+}
+.env-back::after {
+  content: ""; position: absolute; inset: 0; border-radius: 7px; pointer-events: none;
+  z-index: 7; opacity: .72;
+  background:
+    linear-gradient(34deg, transparent 49.55%, rgba(117,87,57,.22) 49.9%, rgba(255,255,255,.16) 50.15%, transparent 50.5%),
+    linear-gradient(-34deg, transparent 49.55%, rgba(117,87,57,.22) 49.9%, rgba(255,255,255,.16) 50.15%, transparent 50.5%);
+  transition: opacity .25s ease;
+}
+.envelope-box-3d.open .env-back::after { opacity: .08; }
+#view-create .envelope-stage { margin-top: 40px; }
+.env-fold-bottom {
+  height: 52%;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--env-base) 78%, white), var(--env-dark));
+  clip-path: polygon(0 100%, 50% 0, 100% 100%);
+  z-index: 6; filter: drop-shadow(0 -1px 1px rgba(105,79,54,.12));
+}
+.env-fold-left {
+  width: 50.2%;
+  background: linear-gradient(90deg, var(--env-dark), color-mix(in srgb, var(--env-base) 84%, white));
+  clip-path: polygon(0 0, 100% 50%, 0 100%); z-index: 5;
+  filter: drop-shadow(1px 0 1px rgba(105,79,54,.12));
+}
+.env-fold-right {
+  width: 50.2%;
+  background: linear-gradient(270deg, var(--env-dark), color-mix(in srgb, var(--env-base) 84%, white));
+  clip-path: polygon(100% 0, 0 50%, 100% 100%); z-index: 5;
+  filter: drop-shadow(-1px 0 1px rgba(105,79,54,.12));
+}
+.env-fold-top {
+  height: 52%;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--env-base) 74%, white), var(--env-dark));
+  clip-path: polygon(0 0, 100% 0, 50% 100%); transform-origin: top center; z-index: 7;
+  filter: drop-shadow(0 3px 4px rgba(70,49,31,.18));
+}
+.envelope-box-3d.open .env-fold-top { transform: rotateX(178deg); z-index: 1; }
+.wax-seal {
+  top: 50%; width: 56px; height: 56px; z-index: 8;
+  border: 2px solid var(--wax-border);
+  border-radius: 44% 52% 47% 53% / 50% 45% 55% 48%;
+  background: var(--wax-bg);
+  box-shadow: inset 0 2px 4px rgba(255,255,255,.36), inset 0 -5px 7px rgba(0,0,0,.22), 0 5px 10px rgba(54,34,24,.26);
+  text-shadow: 0 1px 1px rgba(0,0,0,.35);
+}
+.wax-seal::before {
+  content: ""; position: absolute; inset: 5px; border-radius: 50%;
+  border: 1px solid rgba(255,235,210,.58); box-shadow: inset 0 0 0 1px rgba(50,0,0,.12);
+  pointer-events: none;
+}
+.wax-seal::after {
+  content: ""; position: absolute; width: 7px; height: 7px; left: 11px; top: 9px;
+  border-radius: 50%; background: rgba(255,255,255,.24); filter: blur(1px); pointer-events: none;
+}
+.envelope-box-3d.open .wax-seal { opacity: 0; pointer-events: none; transform: translate(-50%,-50%) scale(.72); }
+@media (max-width: 580px) {
+  .addr-sender { top: 12px; left: 13px; max-width: 36%; }
+  .addr-recipient { left: 29%; right: 15%; max-width: 67%; }
+  .addr-recipient .name { font-size: 16px; }
+  .address-lines { font-size: 9px; }
+  .post-stamp-box { right: 13px; top: 12px; width: 52px; height: 66px; }
+  .track-tag-box { left: 13px; bottom: 11px; font-size: 9px; }
+  .letter-sheet { padding: 15px; }
+  .wax-seal { width: 48px; height: 48px; }
+}
+
+
+
+/* Smoother envelope and letter reveal */
+.envelope-box-3d { transition: transform 1s cubic-bezier(.2,.75,.25,1); transform-style: preserve-3d; }
+.env-fold-top { transition: transform 1s cubic-bezier(.22,.7,.18,1), filter .9s ease; backface-visibility: visible; transform-origin: 50% 0%; }
+.letter-sheet { transition: transform 1.15s cubic-bezier(.18,.82,.22,1), opacity .65s ease, box-shadow .8s ease; will-change: transform, opacity; }
+.envelope-box-3d.open .letter-sheet { transform: translateY(-94px) scale(1.015); }
+.envelope-box-3d.open .env-fold-top { transform: rotateX(178deg); }
+.wax-seal { transition: transform .65s cubic-bezier(.18,.8,.2,1), opacity .5s ease; }
+@media (prefers-reduced-motion: reduce) { .envelope-box-3d, .env-fold-top, .letter-sheet, .wax-seal { transition-duration: .01ms !important; } }
+
 </style>
 </head>
 <body>
@@ -259,7 +382,7 @@ button { cursor: pointer; }
         <button class="btn soft" onclick="go('inbox')">📬 ดูตู้จดหมายทั้งหมด</button>
       </div>
     </div>
-  </div>
+</div>
 
   <!-- CREATE VIEW -->
   <div id="view-create" class="view" style="display:none;">
@@ -284,8 +407,16 @@ button { cursor: pointer; }
             <input type="text" id="input-to" placeholder="เช่น คุณคนพิเศษ" oninput="updatePreview()">
           </div>
           <div class="field">
+            <label>ที่อยู่ผู้รับ / รายละเอียดเพิ่มเติม (ไม่บังคับ):</label>
+            <textarea id="input-to-address" rows="2" placeholder="เช่น กรุงเทพฯ ประเทศไทย หรือข้อความสั้น ๆ ถึงผู้รับ" oninput="updatePreview()"></textarea>
+          </div>
+          <div class="field">
             <label>จาก (From) - ผู้ส่ง:</label>
             <input type="text" id="input-from" placeholder="เช่น แฟนคลับของคุณ" oninput="updatePreview()">
+          </div>
+          <div class="field">
+            <label>ที่อยู่ผู้ส่ง (ไม่บังคับ):</label>
+            <textarea id="input-from-address" rows="2" placeholder="เช่น ชื่อแฟนคลับ / ประเทศ" oninput="updatePreview()"></textarea>
           </div>
           <div class="field">
             <label>หัวข้อ / เรื่อง:</label>
@@ -364,12 +495,14 @@ button { cursor: pointer; }
             
             <div class="env-side env-front">
               <div class="addr-sender">
-                <div class="title">SENDER:</div>
-                <div class="name" id="prev-from">From: แฟนคลับของคุณ</div>
+                <div class="title">FROM</div>
+                <div class="name" id="prev-from">แฟนคลับของคุณ</div>
+                <div class="address-lines sender-address-lines" id="prev-from-address"></div>
               </div>
               <div class="addr-recipient">
-                <div class="title">DELIVER TO:</div>
+                <div class="title">TO</div>
                 <div class="name" id="prev-to">คุณคนพิเศษ</div>
+                <div class="address-lines recipient-address-lines" id="prev-to-address"></div>
               </div>
               <div class="track-tag-box" id="prev-track-code">DL-PREVIEW</div>
               <div class="post-stamp-box">
@@ -410,9 +543,9 @@ button { cursor: pointer; }
   <!-- INBOX VIEW -->
   <div id="view-inbox" class="view" style="display:none;">
     <div class="hero" style="padding: 20px 0 10px;">
-      <h2>ตู้จดหมายทั้งหมด (Cloud Sync)</h2>
-      <p>ค้นหาตามรหัส หรือเลือกเปิดอ่านจดหมายในรายการได้เลย</p>
-
+      <h2 id="inbox-heading">📬 ตู้จดหมายทั้งหมด</h2>
+      <p id="inbox-description">รวมจดหมายทุกฉบับไว้ในที่เดียว หรือค้นหาด้วยรหัสติดตาม</p>
+      <div style="margin:12px auto;display:flex;justify-content:center;"><button class="btn soft" onclick="go('home')">← กลับหน้าหลัก</button></div>
       <div class="tracking-card" style="margin-top: 15px;">
         <input type="text" id="inbox-track-input" placeholder="ค้นหาด้วยรหัสติดตาม DL-XXXXXX">
         <button class="btn primary" onclick="trackLetterFromInput('inbox-track-input')">🔍 ค้นหา</button>
@@ -437,12 +570,14 @@ button { cursor: pointer; }
           
           <div class="env-side env-front">
             <div class="addr-sender">
-              <div class="title">SENDER:</div>
+              <div class="title">FROM</div>
               <div class="name" id="read-from-text">-</div>
+              <div class="address-lines sender-address-lines" id="read-from-address"></div>
             </div>
             <div class="addr-recipient">
-              <div class="title">DELIVER TO:</div>
+              <div class="title">TO</div>
               <div class="name" id="read-to-text">-</div>
+              <div class="address-lines recipient-address-lines" id="read-to-address"></div>
             </div>
             <div class="track-tag-box" id="read-track-code">DL-000000</div>
             <div class="post-stamp-box">
@@ -477,6 +612,9 @@ button { cursor: pointer; }
       <div class="env-actions" style="margin-top: 40px;">
         <button class="btn soft" onclick="toggleFlip('read-envelope-3d')">🔄 พลิกซอง (หน้า/หลัง)</button>
         <button class="btn primary" onclick="toggleOpenReadLetter()">✉️ เปิด/ปิด ซองจดหมาย</button>
+        <button class="btn soft" onclick="downloadLetterImage('png')">🖼️ ดาวน์โหลด PNG</button>
+        <button class="btn soft" onclick="downloadLetterImage('jpeg')">🌄 ดาวน์โหลด JPEG</button>
+        <button class="btn primary" onclick="downloadLetterPDF()">📄 ดาวน์โหลด PDF</button>
       </div>
     </div>
   </div>
@@ -577,9 +715,7 @@ function listenToDatabase() {
       globalLetters.reverse();
     }
     updateInboxCount();
-    if (document.getElementById('view-inbox').style.display !== 'none') {
-      renderInbox();
-    }
+    if (document.getElementById('view-inbox').style.display !== 'none') renderInbox();
   });
 }
 
@@ -627,7 +763,7 @@ function toggleOpenPreviewLetter() {
   const env = document.getElementById('preview-envelope-3d');
   if(!env.classList.contains('flipped')) {
     env.classList.add('flipped');
-    setTimeout(() => { env.classList.toggle('open'); }, 400);
+    setTimeout(() => { env.classList.add('open'); }, 420);
   } else {
     env.classList.toggle('open');
   }
@@ -687,11 +823,15 @@ function selectStamp(stampSrc, el) {
 function updatePreview() {
   const to = document.getElementById('input-to').value;
   const from = document.getElementById('input-from').value;
+  const toAddress = document.getElementById('input-to-address').value;
+  const fromAddress = document.getElementById('input-from-address').value;
   const subject = document.getElementById('input-subject').value;
   const content = document.getElementById('input-content').value;
 
   document.getElementById('prev-to').innerText = to || "คุณคนพิเศษ";
-  document.getElementById('prev-from').innerText = "From: " + (from || "แฟนคลับของคุณ");
+  document.getElementById('prev-from').innerText = from || "แฟนคลับของคุณ";
+  document.getElementById('prev-to-address').innerText = toAddress;
+  document.getElementById('prev-from-address').innerText = fromAddress;
   document.getElementById('prev-subject').innerText = subject || "ไม่มีหัวข้อ";
   document.getElementById('prev-content').innerText = content || "เขียนข้อความจดหมายของคุณ...";
   document.getElementById('prev-date').innerText = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -829,6 +969,8 @@ function rotateSticker(id, deg, event) {
 function resetForm() {
   document.getElementById('input-to').value = '';
   document.getElementById('input-from').value = '';
+  document.getElementById('input-to-address').value = '';
+  document.getElementById('input-from-address').value = '';
   document.getElementById('input-subject').value = '';
   document.getElementById('input-content').value = '';
   document.getElementById('input-pin').value = '';
@@ -848,6 +990,8 @@ function resetForm() {
 function saveLetter() {
   const to = document.getElementById('input-to').value.trim();
   const from = document.getElementById('input-from').value.trim();
+  const toAddress = document.getElementById('input-to-address').value.trim();
+  const fromAddress = document.getElementById('input-from-address').value.trim();
   const subject = document.getElementById('input-subject').value.trim();
   const content = document.getElementById('input-content').value.trim();
   const pin = document.getElementById('input-pin').value.trim();
@@ -866,6 +1010,8 @@ function saveLetter() {
     trackingCode: trackingCode,
     to: to,
     from: from || "แฟนคลับของคุณ",
+    toAddress: toAddress,
+    fromAddress: fromAddress,
     subject: subject || "จดหมายถึงคุณ " + to,
     content: content,
     date: new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }),
@@ -903,14 +1049,17 @@ function trackLetterFromInput(inputId) {
 
 function renderInbox() {
   const list = document.getElementById('inbox-list');
+  if (!list) return;
   list.innerHTML = '';
-
-  if(globalLetters.length === 0) {
-    list.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--muted);">ยังไม่มีจดหมายในตู้</div>`;
+  const lettersToShow = globalLetters;
+  document.getElementById('inbox-heading').innerText = '📬 ตู้จดหมายทั้งหมด';
+  document.getElementById('inbox-description').innerText = 'รวมจดหมายทุกฉบับไว้ในที่เดียว';
+  if(lettersToShow.length === 0) {
+    list.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--muted); background:#fff;border:1px dashed var(--line);border-radius:20px;">📭 ยังไม่มีจดหมายในตู้นี้<br><small>เริ่มเขียนจดหมายฉบับแรกของคุณได้เลย</small></div>`;
     return;
   }
 
-  globalLetters.forEach(letter => {
+  lettersToShow.forEach(letter => {
     const isLocked = Boolean(letter.pin);
     const item = document.createElement('div');
     item.className = 'letter-item';
@@ -1003,8 +1152,10 @@ function openReadView(letter) {
     waxSealEl.style.borderColor = WAX_SEALS[0].border;
   }
 
-  document.getElementById('read-to-text').innerText = letter.to;
-  document.getElementById('read-from-text').innerText = "From: " + letter.from;
+  document.getElementById('read-to-text').innerText = letter.to || 'คุณคนพิเศษ';
+  document.getElementById('read-from-text').innerText = letter.from || 'แฟนคลับของคุณ';
+  document.getElementById('read-to-address').innerText = letter.toAddress || '';
+  document.getElementById('read-from-address').innerText = letter.fromAddress || '';
   document.getElementById('read-date').innerText = letter.date;
   document.getElementById('read-subject').innerText = letter.subject;
   document.getElementById('read-content').innerText = letter.content;
@@ -1042,15 +1193,147 @@ function openReadView(letter) {
   go('read');
 }
 
+let readLetterMotionTimer = null;
 function toggleOpenReadLetter() {
   const env = document.getElementById('read-envelope-3d');
-  if(!env.classList.contains('flipped')) {
+  if (!env) return;
+  if (readLetterMotionTimer) { clearTimeout(readLetterMotionTimer); readLetterMotionTimer = null; }
+
+  // เปิด: พลิกซองก่อน รอให้การพลิกจบ แล้วค่อยคลี่ฝาและเลื่อนกระดาษขึ้น
+  if (!env.classList.contains('flipped')) {
+    env.classList.remove('open');
     env.classList.add('flipped');
-    setTimeout(() => { env.classList.toggle('open'); }, 400);
+    readLetterMotionTimer = setTimeout(() => {
+      env.classList.add('open');
+      readLetterMotionTimer = null;
+    }, 650);
+    return;
+  }
+
+  // ปิด: เก็บกระดาษและฝาซองให้เสร็จก่อนพลิกกลับด้านหน้า
+  if (env.classList.contains('open')) {
+    env.classList.remove('open');
+    readLetterMotionTimer = setTimeout(() => {
+      env.classList.remove('flipped');
+      readLetterMotionTimer = null;
+    }, 780);
   } else {
-    env.classList.toggle('open');
+    env.classList.remove('flipped');
   }
 }
+
+// Export tools: PNG / JPEG / PDF only. Render a clean printable letter card so
+// downloaded text follows the same layout and line breaks across formats.
+function loadExternalScript(src, test) {
+  return new Promise((resolve, reject) => {
+    if (test()) return resolve();
+    const existing = document.querySelector(`script[data-export-src="${src}"]`);
+    if (existing) {
+      existing.addEventListener('load', resolve, { once: true });
+      existing.addEventListener('error', reject, { once: true });
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.dataset.exportSrc = src;
+    script.onload = resolve;
+    script.onerror = () => reject(new Error('โหลดเครื่องมือส่งออกไม่สำเร็จ'));
+    document.head.appendChild(script);
+  });
+}
+
+function buildExportLetter() {
+  if (!currentOpenedLetter) throw new Error('ไม่พบจดหมายที่เปิดอยู่');
+  const l = currentOpenedLetter;
+  const root = document.createElement('div');
+  root.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;z-index:-1;background:#fff;padding:58px 62px;box-sizing:border-box;font-family:Tahoma,"Leelawadee UI","Noto Sans Thai",sans-serif;color:#342d31;line-height:1.8;overflow-wrap:anywhere;';
+  const esc = value => escapeHtml(String(value == null || value === '' ? '-' : value));
+  root.innerHTML = `
+    <div style="font-size:14px;letter-spacing:3px;color:#a36b84;font-weight:800;border-bottom:3px solid #d9b8c7;padding-bottom:15px;">DEARLY · DIGITAL LETTER</div>
+    <h1 style="font-size:30px;line-height:1.45;margin:24px 0 12px;font-weight:700;">${esc(l.subject || '(ไม่มีหัวข้อ)')}</h1>
+    <div style="font-size:13px;color:#8c7b83;margin-bottom:24px;">วันที่ ${esc(l.date || '-')}　·　รหัสติดตาม ${esc(l.trackingCode || 'DL-LEGACY')}</div>
+    <div style="background:#fbf6f8;border:1px solid #eadce2;border-radius:14px;padding:20px 22px;margin-bottom:30px;font-size:14px;">
+      <div style="margin:4px 0;"><b style="color:#80576b;">ถึง:</b> ${esc(l.to)}</div>
+      <div style="margin:4px 0;"><b style="color:#80576b;">ที่อยู่ผู้รับ:</b> ${esc(l.toAddress)}</div>
+      <div style="margin:4px 0;"><b style="color:#80576b;">จาก:</b> ${esc(l.from)}</div>
+      <div style="margin:4px 0;"><b style="color:#80576b;">ที่อยู่ผู้ส่ง:</b> ${esc(l.fromAddress)}</div>
+    </div>
+    <div style="font-size:16px;line-height:2.05;white-space:pre-wrap;overflow-wrap:break-word;word-break:normal;">${esc(l.content || '')}</div>
+    <div style="margin-top:42px;padding-top:14px;border-top:1px solid #eadce2;color:#8c7b83;font-size:11px;">จดหมายฉบับนี้ส่งออกจาก DEARLY</div>`;
+  document.body.appendChild(root);
+  return root;
+}
+
+async function renderLetterCanvas() {
+  await loadExternalScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', () => typeof window.html2canvas === 'function');
+  const root = buildExportLetter();
+  try {
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    const canvas = await window.html2canvas(root, {
+      scale: 2, backgroundColor: '#ffffff', useCORS: true,
+      logging: false, width: root.scrollWidth, height: root.scrollHeight,
+      windowWidth: Math.max(document.documentElement.clientWidth, root.scrollWidth)
+    });
+    return canvas;
+  } finally {
+    root.remove();
+  }
+}
+
+async function downloadLetterImage(format) {
+  try {
+    const canvas = await renderLetterCanvas();
+    const isJpeg = format === 'jpeg';
+    const mime = isJpeg ? 'image/jpeg' : 'image/png';
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, mime, isJpeg ? 0.94 : undefined));
+    if (!blob) throw new Error('สร้างไฟล์ภาพไม่สำเร็จ');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = safeFileName((currentOpenedLetter.subject || 'DEARLY-จดหมาย') + (isJpeg ? '.jpeg' : '.png'));
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  } catch (err) {
+    console.error(err);
+    alert('ดาวน์โหลดรูปไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองอีกครั้ง');
+  }
+}
+
+async function downloadLetterPDF() {
+  try {
+    await loadExternalScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', () => typeof window.html2canvas === 'function');
+    await loadExternalScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', () => !!(window.jspdf && window.jspdf.jsPDF));
+    const canvas = await renderLetterCanvas();
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+    const pageW = 210, pageH = 297, margin = 12;
+    const usableW = pageW - margin * 2, usableH = pageH - margin * 2;
+    const pxPerMm = canvas.width / usableW;
+    const pageSlicePx = Math.floor(usableH * pxPerMm);
+    let y = 0, page = 0;
+    while (y < canvas.height) {
+      const sliceH = Math.min(pageSlicePx, canvas.height - y);
+      const pageCanvas = document.createElement('canvas');
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sliceH;
+      const ctx = pageCanvas.getContext('2d');
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+      ctx.drawImage(canvas, 0, y, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+      if (page > 0) pdf.addPage();
+      const imageData = pageCanvas.toDataURL('image/jpeg', 0.94);
+      const drawH = sliceH / pxPerMm;
+      pdf.addImage(imageData, 'JPEG', margin, margin, usableW, drawH, undefined, 'FAST');
+      y += sliceH; page++;
+    }
+    pdf.save(safeFileName((currentOpenedLetter.subject || 'DEARLY-จดหมาย') + '.pdf'));
+  } catch (err) {
+    console.error(err);
+    alert('ดาวน์โหลด PDF ไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองอีกครั้ง');
+  }
+}
+
+function safeFileName(name) { return String(name).replace(/[\\/:*?"<>|\x00-\x1F]/g, '-').trim().slice(0, 90) || 'DEARLY-letter'; }
 
 function checkAdminUI() {
   const area = document.getElementById('admin-status-area');
@@ -1101,6 +1384,28 @@ function escapeHtml(str) {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+function installImageFallbacks() {
+  const symbols = { '1': '✉', '2': '✿', '3': '★', '4': '♥', '5': '✦', '6': '🌷', '7': '🎀' };
+  document.querySelectorAll('img[src$=".png"]').forEach((img) => {
+    img.onerror = function () {
+      if (this.dataset.fallbackApplied === '1') return;
+      this.dataset.fallbackApplied = '1';
+      const number = ((this.getAttribute('src') || '').match(/([1-7])\.png(?:$|[?#])/i) || [])[1] || '1';
+      const symbol = symbols[number] || '✦';
+      let svg;
+      if (/stamp/i.test(this.alt || '') || /stamp/i.test(this.id || '')) {
+        svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 130"><rect x="4" y="4" width="92" height="122" rx="2" fill="#fff8ea" stroke="#9b8063" stroke-width="3" stroke-dasharray="4 3"/><rect x="11" y="11" width="78" height="108" fill="#f1e4cf" stroke="#d4bea0"/><circle cx="50" cy="48" r="27" fill="#e2c7a7" stroke="#9e7c5a" stroke-width="2"/><text x="50" y="61" text-anchor="middle" font-size="38" fill="#8d5a48">${symbol}</text><text x="50" y="96" text-anchor="middle" font-size="9" letter-spacing="1.3" fill="#775d4b">DEARLY</text></svg>`;
+      } else {
+        svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="43" fill="#f8e8ed" stroke="#d9a7b6" stroke-width="3"/><text x="50" y="67" text-anchor="middle" font-size="55" fill="#ad627e">${symbol}</text></svg>`;
+      }
+      this.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    };
+    // If a local PNG failed before this script ran, apply the fallback immediately.
+    if (img.complete && img.naturalWidth === 0) img.onerror();
+  });
+}
+
+installImageFallbacks();
 window.onload = () => {
   renderSwatches();
   checkAdminUI();
