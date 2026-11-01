@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DEARLY — Interactive Fan Letter & Tracking System</title>
+<title>DEARLY — Interactive Fan Letter</title>
 
 <!-- Firebase SDK (v9 Compat) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -179,7 +179,7 @@ button { cursor: pointer; }
 .env-actions { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
 
 .sticker-layer { position: absolute; inset: 0; z-index: 7; pointer-events: none; }
-.placed-sticker { position: absolute; pointer-events: auto; cursor: move; display: inline-block; transform-origin: center center; }
+.placed-sticker { position: absolute; pointer-events: auto; cursor: move; display: inline-block; transform-origin: center center; touch-action:none; -webkit-user-select:none; user-select:none; }
 .placed-sticker.selected, .placed-sticker:hover { outline: 2px dashed var(--accent); outline-offset: 4px; border-radius: 8px; }
 .placed-sticker img { width: 55px; height: 55px; object-fit: contain; pointer-events: none; display: block; }
 .placed-sticker .emoji-sticker { font-size: 42px; line-height: 1; pointer-events: none; }
@@ -349,6 +349,103 @@ button { cursor: pointer; }
 .wax-seal { transition: transform .65s cubic-bezier(.18,.8,.2,1), opacity .5s ease; }
 @media (prefers-reduced-motion: reduce) { .envelope-box-3d, .env-fold-top, .letter-sheet, .wax-seal { transition-duration: .01ms !important; } }
 
+
+/* Home: a clickable envelope that invites visitors to write */
+.home-letter-intro { text-align:center; padding:38px 0 24px; }
+.home-envelope-button { display:block; position:relative; width:min(440px, 88vw); height:270px; margin:26px auto 18px; border:0; background:transparent; perspective:1000px; cursor:pointer; animation: homeFloat 4s ease-in-out infinite; }
+.home-envelope-body { position:absolute; inset:32px 0 0; border-radius:12px 12px 22px 22px; overflow:hidden; background:linear-gradient(145deg,#fff0e8,#f0cfc1); box-shadow:0 25px 45px rgba(91,58,49,.18); border:1px solid rgba(145,93,76,.18); }
+.home-envelope-body:before,.home-envelope-body:after { content:''; position:absolute; inset:0; }
+.home-envelope-body:before { background:linear-gradient(35deg,transparent 49.5%,rgba(193,132,111,.45) 50%,transparent 50.5%),linear-gradient(-35deg,transparent 49.5%,rgba(193,132,111,.35) 50%,transparent 50.5%); }
+.home-envelope-flap { position:absolute; z-index:2; left:0; right:0; top:32px; height:150px; background:linear-gradient(145deg,#f8dfd3,#e9bcae); clip-path:polygon(0 0,100% 0,50% 100%); filter:drop-shadow(0 6px 4px rgba(91,58,49,.12)); transform-origin:top center; transition:transform .65s cubic-bezier(.2,.8,.2,1); }
+.home-envelope-seal { position:absolute; z-index:3; left:50%; top:132px; transform:translateX(-50%); width:64px; height:64px; display:grid; place-items:center; border-radius:50%; color:#fff6e8; font-size:25px; background:radial-gradient(circle at 30% 25%,#d85f65,#8c263c 75%); border:3px solid rgba(255,255,255,.55); box-shadow:0 8px 16px rgba(91,31,45,.25); }
+.home-envelope-button:hover .home-envelope-flap { transform:rotateX(22deg); }
+.home-envelope-label { position:absolute; z-index:4; bottom:28px; left:0; right:0; font-family:Georgia,serif; font-size:19px; letter-spacing:2px; color:#79564b; }
+.home-cta { color:var(--muted); font-size:14px; margin:0 auto 18px; }
+.wax-seal .wax-art-img { display:block; width:100%; height:100%; object-fit:contain; border-radius:50%; position:absolute; inset:0; padding:1px; }
+.wax-seal.has-art { background:transparent !important; border-color:rgba(255,255,255,.7) !important; overflow:hidden; }
+.wax-seal.has-art::before,.wax-seal.has-art::after { display:none !important; }
+.wax-upload-preview { width:46px;height:46px;object-fit:contain;border-radius:50%;vertical-align:middle;margin-left:8px; }
+@keyframes homeFloat { 0%,100%{transform:translateY(0) rotate(-.3deg)} 50%{transform:translateY(-7px) rotate(.3deg)} }
+@media(max-width:600px){.home-envelope-button{height:235px}.home-envelope-flap{height:130px}.home-envelope-seal{top:112px;width:56px;height:56px}.home-envelope-label{bottom:22px}.home-letter-intro{padding-top:24px}}
+
+.address-locked-note{font-size:12px;color:var(--muted);background:#fffaf5;border:1px dashed var(--line);padding:9px 12px;border-radius:10px;margin:0 0 14px;}
+
+
+/* =====================================
+   DEARLY RESPONSIVE + LETTER EDITOR
+   ปรับได้จากส่วนนี้โดยไม่ต้องแก้ CSS เดิม
+===================================== */
+html, body { width:100%; max-width:100%; overflow-x:clip; }
+button, input, textarea, select { font:inherit; }
+.container { min-width:0; }
+.nav { flex-wrap:wrap; justify-content:flex-end; }
+.letter-editor {
+  width:100%; min-height:230px; padding:14px 15px; border:1px solid var(--line);
+  border-radius:12px; background:#fff; outline:none; line-height:1.85;
+  overflow-wrap:anywhere; white-space:pre-wrap; user-select:text; -webkit-user-select:text;
+  overflow-y:auto; color:var(--ink); font-size:16px;
+}
+.letter-editor:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(224,122,95,.13); }
+.letter-editor, .letter-editor * { user-select:text; -webkit-user-select:text; }
+.letter-editor:empty::before { content:attr(data-placeholder); color:#aaa; pointer-events:none; }
+.letter-editor img, .letter-rich-content img { max-width:100%; height:auto; border-radius:8px; vertical-align:middle; }
+.letter-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:8px; margin-bottom:8px; background:#fffaf6; border:1px solid var(--line); border-radius:12px; }
+.letter-toolbar button { min-width:38px; min-height:38px; padding:6px 9px; border:1px solid var(--line); border-radius:9px; background:#fff; color:var(--ink); }
+.letter-toolbar button:active { background:#ffede6; transform:scale(.97); }
+.letter-toolbar input[type=color] { width:38px; height:38px; padding:3px; border:1px solid var(--line); border-radius:9px; background:white; }
+.letter-toolbar select { max-width:100px; min-height:38px; padding:5px; border:1px solid var(--line); border-radius:9px; background:white; }
+#prev-content, #read-content { overflow-wrap:anywhere; word-break:normal; }
+#prev-content p, #read-content p { margin:.35em 0; }
+#prev-content img, #read-content img { max-width:100%; height:auto; }
+.envelope-stage { max-width:100%; }
+#view-create .grid-2 > *, #view-read, #view-inbox { min-width:0; }
+
+@media (max-width: 700px) {
+  .container { width:calc(100% - 20px); }
+  .topbar-in { min-height:62px; height:auto; padding:10px 0; align-items:flex-start; gap:8px; }
+  .brand { font-size:15px; padding-top:8px; flex-shrink:0; }
+  .nav { gap:4px; }
+  .nav button { padding:7px 8px; font-size:12px; border-radius:9px; }
+  .admin-badge { font-size:10px; padding:4px 7px; }
+  .hero { padding-top:22px; }
+  .hero p { font-size:14px; }
+  .card { padding:14px; border-radius:18px; }
+  .grid { gap:14px; }
+  .grid-2 { grid-template-columns:minmax(0,1fr); }
+  #view-create .grid-2 > div:last-child { position:static !important; top:auto !important; }
+  .envelope-stage { width:100%; max-width:480px; margin:14px auto; }
+  #view-read .envelope-stage { height:auto !important; aspect-ratio:1.5; }
+  .letter-sheet { padding:12px; }
+  .envelope-box-3d.open .letter-sheet { transform:translateY(-18%) scale(1); max-height:88%; overflow-y:auto; }
+  .letter-sheet h2, .letter-sheet h3 { font-size:17px; overflow-wrap:anywhere; }
+  .addr-sender { top:10px; left:12px; max-width:34%; }
+  .addr-sender .name { font-size:10px; }
+  .addr-recipient { left:29%; right:17%; max-width:66%; }
+  .addr-recipient .name { font-size:clamp(14px,4vw,17px); }
+  .address-lines { font-size:8px; }
+  .post-stamp-box { top:10px; right:12px; width:43px; height:56px; }
+  .track-tag-box { left:12px; bottom:10px; font-size:8px; padding:3px 6px; }
+  .wax-seal { width:44px; height:44px; }
+  .env-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:12px !important; }
+  .env-actions .btn { width:100%; min-width:0; padding:10px 6px; font-size:12px; white-space:normal; }
+  .letter-toolbar { gap:5px; padding:6px; }
+  .letter-toolbar button { min-width:35px; min-height:38px; padding:5px 7px; }
+  .letter-editor { min-height:200px; padding:12px; font-size:16px; }
+  .picker-grid { grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; }
+  .sticker-opt { width:100%; height:auto; aspect-ratio:1; min-width:0; }
+  .stamp-opt { width:44px; height:56px; }
+  #create-step-2 > div[style*="display: flex"] { flex-wrap:wrap; }
+  #create-step-2 > div[style*="display: flex"] .btn { flex:1 1 140px !important; }
+  .letter-item { grid-template-columns:minmax(0,1fr) !important; }
+}
+@media (max-width:380px) {
+  .nav button { font-size:11px; padding:6px; }
+  .post-stamp-box { width:37px; height:49px; }
+  .addr-recipient { left:27%; right:15%; }
+  .addr-recipient .name { font-size:14px; }
+  .wax-seal { width:40px; height:40px; }
+}
+
 </style>
 </head>
 <body>
@@ -368,21 +465,22 @@ button { cursor: pointer; }
 <main class="container" style="padding-bottom: 60px;">
   <!-- HOME VIEW -->
   <div id="view-home" class="view" style="display:none;">
-    <div class="hero">
-      <h1>ส่งความรู้สึกผ่านซองจดหมาย 💌</h1>
-      <p>เขียนเนื้อหาจดหมายก่อน แล้วตกแต่งซองจดหมายด้วยแสตมป์ สติ๊กเกอร์ และตราประทับ Wax Seal</p>
-
-      <div class="tracking-card">
-        <input type="text" id="home-track-input" placeholder="กรอกรหัสจดหมาย เช่น DL-849201">
-        <button class="btn primary" onclick="trackLetterFromInput('home-track-input')">🔍 ติดตาม</button>
+    <section class="home-letter-intro">
+      <p style="font-size:12px;letter-spacing:4px;font-weight:900;color:var(--accent);margin:0 0 10px;">A LITTLE NOTE, JUST FOR YOU</p>
+      <h1>มีจดหมายอยากส่งถึงใครไหม? 💌</h1>
+      <p class="home-cta">คลิกที่ซองจดหมายเพื่อเริ่มเขียนข้อความจากใจ</p>
+      <button class="home-envelope-button" onclick="startWritingFromHome()" aria-label="คลิกซองจดหมายเพื่อเริ่มเขียน">
+        <span class="home-envelope-body"></span>
+        <span class="home-envelope-flap"></span>
+        <span class="home-envelope-seal">✦</span>
+        <span class="home-envelope-label">A LETTER FOR YOU</span>
+      </button>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px;">
+        <button class="btn primary" onclick="startWritingFromHome()">✍️ เขียนจดหมาย</button>
+        <button class="btn soft" onclick="go('inbox')">📬 เปิดตู้จดหมาย</button>
       </div>
-
-      <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: center;">
-        <button class="btn primary" onclick="go('create')">✍️ เริ่มเขียนจดหมาย</button>
-        <button class="btn soft" onclick="go('inbox')">📬 ดูตู้จดหมายทั้งหมด</button>
-      </div>
-    </div>
-</div>
+    </section>
+  </div>
 
   <!-- CREATE VIEW -->
   <div id="view-create" class="view" style="display:none;">
@@ -406,31 +504,43 @@ button { cursor: pointer; }
             <label>ถึง (To) - ผู้รับ:</label>
             <input type="text" id="input-to" placeholder="เช่น คุณคนพิเศษ" oninput="updatePreview()">
           </div>
-          <div class="field">
-            <label>ที่อยู่ผู้รับ / รายละเอียดเพิ่มเติม (ไม่บังคับ):</label>
-            <textarea id="input-to-address" rows="2" placeholder="เช่น กรุงเทพฯ ประเทศไทย หรือข้อความสั้น ๆ ถึงผู้รับ" oninput="updatePreview()"></textarea>
-          </div>
+          <input type="hidden" id="input-to-address" value="">
+          <p class="address-locked-note">📮 ที่อยู่ผู้รับกำหนดโดยผู้ดูแลระบบ ไม่ต้องกรอกเอง</p>
           <div class="field">
             <label>จาก (From) - ผู้ส่ง:</label>
             <input type="text" id="input-from" placeholder="เช่น แฟนคลับของคุณ" oninput="updatePreview()">
           </div>
-          <div class="field">
-            <label>ที่อยู่ผู้ส่ง (ไม่บังคับ):</label>
-            <textarea id="input-from-address" rows="2" placeholder="เช่น ชื่อแฟนคลับ / ประเทศ" oninput="updatePreview()"></textarea>
-          </div>
+          <input type="hidden" id="input-from-address" value="">
+          <p class="address-locked-note">✉️ ที่อยู่ผู้ส่งกำหนดโดยผู้ดูแลระบบ</p>
           <div class="field">
             <label>หัวข้อ / เรื่อง:</label>
             <input type="text" id="input-subject" placeholder="เช่น สุขสันต์วันเกิดนะ!" oninput="updatePreview()">
           </div>
           <div class="field">
-            <label>เนื้อหาจดหมาย:</label>
-            <textarea id="input-content" rows="6" placeholder="เขียนข้อความซึ้งๆ ตรงนี้..." oninput="updatePreview()"></textarea>
+            <label>เนื้อหาจดหมาย: (ตกแต่งข้อความ เพิ่มอิโมจิและรูปภาพได้)</label>
+            <div class="letter-toolbar" aria-label="เครื่องมือตกแต่งจดหมาย">
+              <button type="button" title="ตัวหนา" onclick="formatLetter('bold')"><b>B</b></button>
+              <button type="button" title="ตัวเอียง" onclick="formatLetter('italic')"><i>I</i></button>
+              <button type="button" title="ขีดเส้นใต้" onclick="formatLetter('underline')"><u>U</u></button>
+              <input type="color" value="#3a322d" title="สีตัวอักษร" onchange="formatLetterColor(this.value)">
+              <select title="ขนาดตัวอักษร" onchange="formatLetterSize(this.value)">
+                <option value="3">ปกติ</option><option value="2">เล็ก</option><option value="4">ใหญ่</option><option value="5">ใหญ่มาก</option>
+              </select>
+              <button type="button" title="จัดชิดซ้าย" onclick="formatLetter('justifyLeft')">☰</button>
+              <button type="button" title="จัดกึ่งกลาง" onclick="formatLetter('justifyCenter')">≡</button>
+              <button type="button" title="จัดชิดขวา" onclick="formatLetter('justifyRight')">☷</button>
+              <button type="button" title="แทรกอิโมจิ" onclick="insertLetterEmoji('💗')">💗</button>
+              <button type="button" title="แทรกดอกไม้" onclick="insertLetterEmoji('🌷')">🌷</button>
+              <button type="button" title="แทรกประกาย" onclick="insertLetterEmoji('✨')">✨</button>
+              <button type="button" title="แทรกตุ๊กตา" onclick="insertLetterEmoji('🧸')">🧸</button>
+              <button type="button" title="แทรกซองจดหมาย" onclick="insertLetterEmoji('💌')">💌</button>
+              <label class="btn soft" style="padding:7px 10px;min-height:38px;font-size:12px;" for="letter-image-upload">🖼️ เพิ่มรูป</label>
+              <input type="file" id="letter-image-upload" accept="image/png,image/jpeg,image/webp" hidden onchange="insertLetterImage(event)">
+              <button type="button" title="ล้างรูปแบบ" onclick="clearLetterFormatting()">🧹</button>
+            </div>
+            <div id="input-content" class="letter-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="เนื้อหาจดหมาย" data-placeholder="เขียนข้อความซึ้ง ๆ ตรงนี้... 💗" oninput="updatePreview()"></div>
+            <small style="color:var(--muted);">เคล็ดลับ: แตะตำแหน่งที่ต้องการก่อนกดอิโมจิหรือเครื่องมือตกแต่ง</small>
           </div>
-          <div class="field">
-            <label>ตั้งรหัสผ่าน PIN เปิดซอง (ตัวเลือกเพิ่มเติม):</label>
-            <input type="password" id="input-pin" maxlength="6" placeholder="ปล่อยว่างไว้หากเป็นจดหมายสาธารณะ">
-          </div>
-
           <button class="btn primary" style="width: 100%; margin-top: 10px;" onclick="goToStep(2)">
             ไปขั้นตอนต่อไป: ตกแต่งซองจดหมาย ➔
           </button>
@@ -448,10 +558,16 @@ button { cursor: pointer; }
           <div class="field">
             <label>2. เลือกสีตราประทับ Wax Seal (ด้านหลังซอง):</label>
             <div class="color-swatches" id="wax-swatches"></div>
+            <div class="field" style="margin-top:12px;">
+              <label>หรือใช้ภาพ Wax Seal ที่คุณวาดเอง (PNG / JPEG):</label>
+              <input type="file" id="wax-art-upload" accept="image/png,image/jpeg,image/webp" onchange="loadCustomWaxArt(event)">
+              <small style="color:var(--muted);display:block;margin-top:5px;">แนะนำภาพพื้นหลังโปร่งใส PNG จะสวยที่สุด</small>
+              <div id="wax-art-status" style="font-size:12px;color:var(--muted);margin-top:6px;"></div>
+            </div>
           </div>
 
           <div class="field">
-            <label>3. เลือกแสตมป์ :</label>
+            <label>3. เลือกดวงตราไปรษณียากร (แสตมป์):</label>
             <div class="picker-grid" id="stamp-picker">
               <button class="stamp-opt active" onclick="selectStamp('1.png', this)"><img src="1.png" alt="Stamp 1"></button>
               <button class="stamp-opt" onclick="selectStamp('2.png', this)"><img src="2.png" alt="Stamp 2"></button>
@@ -473,7 +589,6 @@ button { cursor: pointer; }
               <button class="sticker-opt" onclick="addSticker('emoji', '🌟')">🌟</button>
               <button class="sticker-opt" onclick="addSticker('emoji', '🎀')">🎀</button>
               <button class="sticker-opt" onclick="addSticker('emoji', '🌸')">🌸</button>
-              <button class="sticker-opt" onclick="addSticker('emoji', '🐰')">🐰</button>
             </div>
           </div>
 
@@ -497,15 +612,15 @@ button { cursor: pointer; }
             <div class="env-side env-front">
               <div class="addr-sender">
                 <div class="title">FROM</div>
-                <div class="name" id="prev-from">ME</div>
+                <div class="name" id="prev-from">แฟนคลับของคุณ</div>
                 <div class="address-lines sender-address-lines" id="prev-from-address"></div>
               </div>
               <div class="addr-recipient">
                 <div class="title">TO</div>
-                <div class="name" id="prev-to">YOU</div>
+                <div class="name" id="prev-to">คุณคนพิเศษ</div>
                 <div class="address-lines recipient-address-lines" id="prev-to-address"></div>
               </div>
-              <div class="track-tag-box" id="prev-track-code">DL-PREVIEW</div>
+              <div class="track-tag-box" id="prev-track-code">Pochi-301195</div>
               <div class="post-stamp-box">
                 <img id="prev-stamp-img" src="1.png" alt="Stamp">
               </div>
@@ -527,7 +642,7 @@ button { cursor: pointer; }
               <div class="env-fold-right"></div>
               <div class="env-fold-top"></div>
               
-              <div class="wax-seal" onclick="toggleOpenPreviewLetter()" title="คลิกเพื่อคลี่ดูแผ่นกระดาษจดหมาย">✦</div>
+              <div class="wax-seal" id="preview-wax-seal" onclick="toggleOpenPreviewLetter()" title="คลิกเพื่อคลี่ดูแผ่นกระดาษจดหมาย">✦</div>
             </div>
 
           </div>
@@ -545,12 +660,8 @@ button { cursor: pointer; }
   <div id="view-inbox" class="view" style="display:none;">
     <div class="hero" style="padding: 20px 0 10px;">
       <h2 id="inbox-heading">📬 ตู้จดหมายทั้งหมด</h2>
-      <p id="inbox-description">รวมจดหมายทุกฉบับไว้ในที่เดียว หรือค้นหาด้วยรหัสติดตาม</p>
+      <p id="inbox-description">รวมจดหมายทุกฉบับไว้ในที่เดียว 💌</p>
       <div style="margin:12px auto;display:flex;justify-content:center;"><button class="btn soft" onclick="go('home')">← กลับหน้าหลัก</button></div>
-      <div class="tracking-card" style="margin-top: 15px;">
-        <input type="text" id="inbox-track-input" placeholder="ค้นหาด้วยรหัสติดตาม DL-XXXXXX">
-        <button class="btn primary" onclick="trackLetterFromInput('inbox-track-input')">🔍 ค้นหา</button>
-      </div>
     </div>
 
     <div style="max-width: 820px; margin: 20px auto 0;">
@@ -580,7 +691,7 @@ button { cursor: pointer; }
               <div class="name" id="read-to-text">-</div>
               <div class="address-lines recipient-address-lines" id="read-to-address"></div>
             </div>
-            <div class="track-tag-box" id="read-track-code">DL-000000</div>
+            <div class="track-tag-box" id="read-track-code">Pochi-301195</div>
             <div class="post-stamp-box">
               <img id="read-stamp-img" src="1.png" alt="Stamp">
             </div>
@@ -593,7 +704,7 @@ button { cursor: pointer; }
             <div class="letter-sheet" id="read-letter-sheet">
               <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 800; color: var(--accent);">
                 <span id="read-date">DATE</span>
-                <span id="read-sheet-track">TRACK: DL-XXXXXX</span>
+                <span id="read-sheet-track">CODE: Pochi-301195</span>
               </div>
               <h2 style="margin: 8px 0 14px;" id="read-subject">Subject</h2>
               <div style="font-size: 15px; line-height: 1.8; white-space: pre-wrap; color: var(--ink);" id="read-content"></div>
@@ -641,20 +752,6 @@ button { cursor: pointer; }
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-pin">
-  <div class="modal-card">
-    <h3 style="margin-top:0;">🔒 จดหมายนี้ถูกล็อค</h3>
-    <p style="font-size: 13px; color: var(--muted);">กรุณากรอกรหัสผ่าน PIN 6 หลักเพื่อเปิดอ่านจดหมาย</p>
-    <div class="field">
-      <input type="password" id="unlock-pin" maxlength="6" placeholder="กรอกรหัส PIN" style="text-align: center; font-size: 20px; letter-spacing: 4px;">
-    </div>
-    <div id="pin-error" style="color: red; font-size: 12px; margin-bottom: 10px; display: none;">รหัส PIN ไม่ถูกต้อง!</div>
-    <div style="display: flex; gap: 8px; justify-content: flex-end;">
-      <button class="btn soft" onclick="closeModal('modal-pin')">ยกเลิก</button>
-      <button class="btn primary" onclick="confirmUnlockPin()">ยืนยัน</button>
-    </div>
-  </div>
-</div>
 
 <script>
 // -----------------------------------------------------------------
@@ -676,6 +773,12 @@ if (!firebase.apps.length) {
 }
 const db = firebase.database();
 
+// ผู้ดูแลระบบกำหนดที่อยู่ส่วนกลางได้ตรงนี้ (ปล่อยว่างได้หากไม่ต้องการแสดง)
+const FIXED_ADDRESSES = {
+  toAddress: "",   // ที่อยู่ผู้รับที่ผู้ดูแลกำหนด
+  fromAddress: ""  // ที่อยู่ผู้ส่งที่ผู้ดูแลกำหนด
+};
+
 const THEMES = [
   { name: "Classic Cream", base: "#f7f1e5", dark: "#e8dcc8" },
   { name: "Rose Pastel", base: "#ffe5ec", dark: "#ffc2d1" },
@@ -695,10 +798,13 @@ const WAX_SEALS = [
 
 let currentTheme = THEMES[0];
 let currentWax = WAX_SEALS[0];
+// เปลี่ยนชื่อไฟล์ Wax ของคุณเป็น wax-seal.png แล้ววางไว้ข้าง index.html
+// หากยังไม่ต้องการใช้ภาพตายตัว ให้เปลี่ยนค่าเป็น ""
+const FIXED_WAX_IMAGE = "wax-seal.png";
+let currentWaxImageData = FIXED_WAX_IMAGE;
 let currentStamp = '1.png';
 let currentStickers = [];
 let selectedStickerId = null;
-let activeLetterForUnlock = null;
 let currentOpenedLetter = null;
 let isAdmin = false;
 let currentStep = 1;
@@ -720,8 +826,13 @@ function listenToDatabase() {
   });
 }
 
-function generateTrackingCode() {
-  return "DL-" + Math.floor(100000 + Math.random() * 900000);
+// ใช้ Code กลางแบบตายตัวตามที่กำหนด ไม่สุ่มรหัสใหม่ในแต่ละฉบับ
+function generateLetterCode() {
+  return "Pochi-301195";
+}
+
+function getLetterCode(letter) {
+  return "Pochi-301195";
 }
 
 function go(view) {
@@ -744,7 +855,8 @@ function goToStep(step) {
     document.getElementById('preview-envelope-3d').classList.remove('flipped');
   } else {
     const to = document.getElementById('input-to').value.trim();
-    const content = document.getElementById('input-content').value.trim();
+    const contentEditor = document.getElementById('input-content');
+    const content = contentEditor ? contentEditor.innerText.trim() : '';
     if(!to || !content) {
       alert('กรุณากรอก "ผู้รับ" และ "เนื้อหาจดหมาย" ในขั้นตอนที่ 1 ก่อนครับ');
       return;
@@ -809,9 +921,42 @@ function setEnvelopeTheme(theme) {
 
 function setWaxTheme(wax) {
   currentWax = wax;
+  currentWaxImageData = FIXED_WAX_IMAGE || "";
   const env = document.getElementById('preview-envelope-3d');
   env.style.setProperty('--wax-bg', wax.bg);
   env.style.setProperty('--wax-border', wax.border);
+  const seal = document.getElementById('preview-wax-seal');
+  if (seal) {
+    if (FIXED_WAX_IMAGE) { seal.classList.add('has-art'); seal.innerHTML = `<img class="wax-art-img" src="${FIXED_WAX_IMAGE}" alt="DEARLY Wax Seal">`; }
+    else { seal.classList.remove('has-art'); seal.querySelector('.wax-art-img')?.remove(); seal.innerHTML = '✦'; }
+  }
+  const status = document.getElementById('wax-art-status');
+  if (status) status.textContent = FIXED_WAX_IMAGE ? 'ใช้ภาพ Wax ประจำเว็บไซต์: ' + FIXED_WAX_IMAGE : '';
+  const upload = document.getElementById('wax-art-upload');
+  if (upload) upload.value = '';
+}
+
+function loadCustomWaxArt(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
+    alert('กรุณาเลือกภาพ PNG, JPEG หรือ WEBP'); event.target.value = ''; return;
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    alert('ภาพ Wax Seal ควรมีขนาดไม่เกิน 2 MB เพื่อไม่ให้ข้อมูลจดหมายใหญ่เกินไป'); event.target.value = ''; return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    currentWaxImageData = String(reader.result || '');
+    const seal = document.getElementById('preview-wax-seal');
+    if (seal) {
+      seal.classList.add('has-art');
+      seal.innerHTML = `<img class="wax-art-img" src="${currentWaxImageData}" alt="Custom Wax Seal">`;
+    }
+    const status = document.getElementById('wax-art-status');
+    if (status) status.innerHTML = `ใช้ภาพ Wax ที่วาดเองแล้ว <img class="wax-upload-preview" src="${currentWaxImageData}" alt="ตัวอย่าง Wax">`;
+  };
+  reader.readAsDataURL(file);
 }
 
 function selectStamp(stampSrc, el) {
@@ -821,20 +966,122 @@ function selectStamp(stampSrc, el) {
   document.getElementById('prev-stamp-img').src = stampSrc;
 }
 
+// Sanitize user-authored rich text: allow simple formatting and embedded images only.
+function sanitizeLetterHtml(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(String(html || ''), 'text/html');
+  const allowedTags = new Set(['DIV','P','BR','B','STRONG','I','EM','U','S','SPAN','UL','OL','LI','IMG','FONT']);
+  const allowedStyles = new Set(['color','font-size','text-align','font-weight','font-style','text-decoration','max-width','height','border-radius']);
+  function clean(node) {
+    [...node.childNodes].forEach(child => {
+      if (child.nodeType === Node.TEXT_NODE) return;
+      if (child.nodeType !== Node.ELEMENT_NODE) { child.remove(); return; }
+      if (!allowedTags.has(child.tagName)) {
+        clean(child);
+        child.replaceWith(...child.childNodes);
+        return;
+      }
+      [...child.attributes].forEach(attr => {
+        const name = attr.name.toLowerCase();
+        if (name === 'style') {
+          const rules = [];
+          attr.value.split(';').forEach(rule => {
+            const parts = rule.split(':');
+            if (parts.length < 2) return;
+            const prop = parts.shift().trim().toLowerCase();
+            const val = parts.join(':').trim();
+            if (allowedStyles.has(prop) && !/url\s*\(|expression|javascript/i.test(val)) rules.push(`${prop}:${val}`);
+          });
+          if (rules.length) child.setAttribute('style', rules.join(';')); else child.removeAttribute('style');
+        } else if (child.tagName === 'IMG' && ['src','alt','width','height'].includes(name)) {
+          if (name === 'src' && !(/^(data:image\/(png|jpeg|webp);base64,|https:\/\/)/i.test(attr.value))) child.removeAttribute('src');
+        } else child.removeAttribute(attr.name);
+      });
+      if (child.tagName === 'IMG') {
+        child.setAttribute('alt', child.getAttribute('alt') || 'รูปภาพในจดหมาย');
+        child.style.maxWidth = '100%'; child.style.height = 'auto';
+        if (!child.getAttribute('src')) child.remove();
+      } else clean(child);
+    });
+  }
+  clean(doc.body);
+  return doc.body.innerHTML;
+}
+
+function formatLetter(command) {
+  const editor = document.getElementById('input-content');
+  if (!editor) return;
+  editor.focus();
+  document.execCommand(command, false, null);
+  updatePreview();
+}
+function formatLetterColor(color) {
+  const editor = document.getElementById('input-content');
+  if (!editor) return;
+  editor.focus();
+  document.execCommand('foreColor', false, color);
+  updatePreview();
+}
+function formatLetterSize(size) {
+  const editor = document.getElementById('input-content');
+  if (!editor) return;
+  editor.focus();
+  document.execCommand('styleWithCSS', false, true);
+  document.execCommand('fontSize', false, size);
+  updatePreview();
+}
+function insertLetterEmoji(emoji) {
+  const editor = document.getElementById('input-content');
+  if (!editor) return;
+  editor.focus();
+  document.execCommand('insertText', false, emoji);
+  updatePreview();
+}
+function clearLetterFormatting() {
+  const editor = document.getElementById('input-content');
+  if (!editor) return;
+  editor.focus();
+  document.execCommand('removeFormat', false, null);
+  updatePreview();
+}
+function insertLetterImage(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  if (!/^image\/(png|jpeg|webp)$/.test(file.type)) { alert('กรุณาเลือกภาพ PNG, JPEG หรือ WEBP'); event.target.value=''; return; }
+  if (file.size > 900 * 1024) { alert('กรุณาใช้รูปภาพขนาดไม่เกิน 900 KB เพื่อให้บันทึก Firebase ได้ง่ายขึ้น'); event.target.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const editor = document.getElementById('input-content');
+    editor.focus();
+    const img = document.createElement('img');
+    img.src = String(reader.result || ''); img.alt = 'รูปภาพในจดหมาย';
+    img.style.maxWidth = '100%'; img.style.height = 'auto'; img.style.borderRadius = '8px';
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount && editor.contains(sel.anchorNode)) {
+      const range = sel.getRangeAt(0); range.deleteContents(); range.insertNode(img);
+      range.setStartAfter(img); range.collapse(true); sel.removeAllRanges(); sel.addRange(range);
+    } else editor.appendChild(img);
+    updatePreview(); event.target.value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
 function updatePreview() {
   const to = document.getElementById('input-to').value;
   const from = document.getElementById('input-from').value;
   const toAddress = document.getElementById('input-to-address').value;
   const fromAddress = document.getElementById('input-from-address').value;
   const subject = document.getElementById('input-subject').value;
-  const content = document.getElementById('input-content').value;
+  const editor = document.getElementById('input-content');
+  const contentHtml = editor ? sanitizeLetterHtml(editor.innerHTML) : '';
+  const contentText = editor ? editor.innerText.trim() : '';
 
   document.getElementById('prev-to').innerText = to || "คุณคนพิเศษ";
   document.getElementById('prev-from').innerText = from || "แฟนคลับของคุณ";
   document.getElementById('prev-to-address').innerText = toAddress;
   document.getElementById('prev-from-address').innerText = fromAddress;
   document.getElementById('prev-subject').innerText = subject || "ไม่มีหัวข้อ";
-  document.getElementById('prev-content').innerText = content || "เขียนข้อความจดหมายของคุณ...";
+  document.getElementById('prev-content').innerHTML = contentText ? contentHtml : 'เขียนข้อความจดหมายของคุณ...';
   document.getElementById('prev-date').innerText = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
@@ -970,11 +1217,10 @@ function rotateSticker(id, deg, event) {
 function resetForm() {
   document.getElementById('input-to').value = '';
   document.getElementById('input-from').value = '';
-  document.getElementById('input-to-address').value = '';
-  document.getElementById('input-from-address').value = '';
+  document.getElementById('input-to-address').value = FIXED_ADDRESSES.toAddress;
+  document.getElementById('input-from-address').value = FIXED_ADDRESSES.fromAddress;
   document.getElementById('input-subject').value = '';
-  document.getElementById('input-content').value = '';
-  document.getElementById('input-pin').value = '';
+  document.getElementById('input-content').innerHTML = '';
   currentStickers = [];
   selectedStickerId = null;
   setEnvelopeTheme(THEMES[0]);
@@ -991,11 +1237,12 @@ function resetForm() {
 function saveLetter() {
   const to = document.getElementById('input-to').value.trim();
   const from = document.getElementById('input-from').value.trim();
-  const toAddress = document.getElementById('input-to-address').value.trim();
-  const fromAddress = document.getElementById('input-from-address').value.trim();
+  const toAddress = FIXED_ADDRESSES.toAddress.trim();
+  const fromAddress = FIXED_ADDRESSES.fromAddress.trim();
   const subject = document.getElementById('input-subject').value.trim();
-  const content = document.getElementById('input-content').value.trim();
-  const pin = document.getElementById('input-pin').value.trim();
+  const contentEditor = document.getElementById('input-content');
+  const contentHtml = contentEditor ? sanitizeLetterHtml(contentEditor.innerHTML) : '';
+  const content = contentEditor ? contentEditor.innerText.trim() : '';
 
   if(!to || !content) {
     alert('กรุณากรอกชื่อผู้รับและเนื้อหาจดหมายก่อนส่งครับ');
@@ -1003,23 +1250,24 @@ function saveLetter() {
     return;
   }
 
-  const trackingCode = generateTrackingCode();
+  const letterCode = generateLetterCode();
   const letterId = "letter-" + Date.now();
 
   const newLetter = {
     id: letterId,
-    trackingCode: trackingCode,
+    code: letterCode,
+    trackingCode: letterCode, // เก็บไว้เพื่อรองรับข้อมูลเก่าที่ใช้ชื่อฟิลด์นี้
     to: to,
     from: from || "แฟนคลับของคุณ",
     toAddress: toAddress,
     fromAddress: fromAddress,
     subject: subject || "จดหมายถึงคุณ " + to,
     content: content,
+    contentHtml: contentHtml,
     date: new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }),
-    pin: pin,
     stamp: currentStamp,
     theme: currentTheme,
-    wax: currentWax,
+    wax: { ...currentWax, imageData: currentWaxImageData },
     stickers: currentStickers
   };
 
@@ -1027,25 +1275,10 @@ function saveLetter() {
     if (error) {
       alert('❌ ไม่สามารถบันทึกข้อมูลลงระบบคลาวด์ได้: ' + error.message);
     } else {
-      alert(`📩 ส่งจดหมายลงตู้สำเร็จเรียบร้อย!\n\n📌 รหัสติดตามของคุณคือ: ${trackingCode}\n(เพื่อนๆ สามารถเปิดเข้าอ่านจดหมายซองนี้ได้ทันที!)`);
+      alert(`📩 ส่งจดหมายลงตู้สำเร็จเรียบร้อย!\n\n📌 Code จดหมายของคุณคือ: ${letterCode}\n(เพื่อนๆ สามารถเปิดเข้าอ่านจดหมายซองนี้ได้ทันที!)`);
       go('inbox');
     }
   });
-}
-
-function trackLetterFromInput(inputId) {
-  const code = document.getElementById(inputId).value.trim().toUpperCase();
-  if(!code) {
-    alert('กรุณากรอกรหัสติดตามจดหมาย (เช่น DL-849201)');
-    return;
-  }
-  const found = globalLetters.find(l => (l.trackingCode && l.trackingCode.toUpperCase() === code) || l.id === code);
-
-  if(found) {
-    tryOpenLetter(found.id);
-  } else {
-    alert(`ไม่พบจดหมายรหัส "${code}" ในระบบ กรุณาตรวจสอบรหัสอีกครั้งครับ`);
-  }
 }
 
 function renderInbox() {
@@ -1061,7 +1294,6 @@ function renderInbox() {
   }
 
   lettersToShow.forEach(letter => {
-    const isLocked = Boolean(letter.pin);
     const item = document.createElement('div');
     item.className = 'letter-item';
     
@@ -1073,7 +1305,7 @@ function renderInbox() {
     item.innerHTML = `
       <div>
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-          <span class="track-code-badge">${letter.trackingCode || 'DL-LEGACY'}</span>
+          <span class="track-code-badge">${escapeHtml(getLetterCode(letter))}</span>
           <span style="font-weight: 900; font-size: 16px; color: var(--ink);">${escapeHtml(letter.subject)}</span>
         </div>
         <div style="font-size: 13px; color: var(--muted);">
@@ -1081,8 +1313,8 @@ function renderInbox() {
         </div>
       </div>
       <div style="display: flex; gap: 8px; align-items: center;">
-        <span class="badge-status ${isLocked ? 'locked' : 'public'}">
-          ${isLocked ? '🔒 มี PIN' : '🌐 สาธารณะ'}
+        <span class="badge-status public">
+          🌐 เปิดอ่านได้
         </span>
         <button class="btn primary" style="padding: 6px 14px; font-size: 13px;" onclick="tryOpenLetter('${letter.id}')">
           เปิดอ่าน
@@ -1113,26 +1345,14 @@ function deleteLetter(id, event) {
 
 function tryOpenLetter(id) {
   const letter = globalLetters.find(l => l.id === id);
-  if(!letter) return;
-
-  if(isAdmin || !letter.pin) {
-    openReadView(letter);
-  } else {
-    activeLetterForUnlock = letter;
-    document.getElementById('unlock-pin').value = '';
-    document.getElementById('pin-error').style.display = 'none';
-    showModal('modal-pin');
-  }
+  if (!letter) return;
+  // เปิดอ่านได้ทันที ไม่มี PIN แม้เป็นจดหมายที่สร้างด้วยเวอร์ชันเก่า
+  openReadView(letter);
 }
 
-function confirmUnlockPin() {
-  const pinInput = document.getElementById('unlock-pin').value;
-  if(activeLetterForUnlock && pinInput === activeLetterForUnlock.pin) {
-    closeModal('modal-pin');
-    openReadView(activeLetterForUnlock);
-  } else {
-    document.getElementById('pin-error').style.display = 'block';
-  }
+function startWritingFromHome() {
+  resetForm();
+  go('create');
 }
 
 function openReadView(letter) {
@@ -1146,11 +1366,18 @@ function openReadView(letter) {
   
   const waxSealEl = document.getElementById('read-wax-seal');
   if(letter.wax) {
-    waxSealEl.style.background = letter.wax.bg;
-    waxSealEl.style.borderColor = letter.wax.border;
+    waxSealEl.style.background = letter.wax.bg || WAX_SEALS[0].bg;
+    waxSealEl.style.borderColor = letter.wax.border || WAX_SEALS[0].border;
   } else {
     waxSealEl.style.background = WAX_SEALS[0].bg;
     waxSealEl.style.borderColor = WAX_SEALS[0].border;
+  }
+  waxSealEl.classList.remove('has-art');
+  waxSealEl.innerHTML = '✦';
+  const waxImage = (letter.wax && letter.wax.imageData) || FIXED_WAX_IMAGE;
+  if (waxImage) {
+    waxSealEl.classList.add('has-art');
+    waxSealEl.innerHTML = `<img class="wax-art-img" src="${waxImage}" alt="Wax Seal">`;
   }
 
   document.getElementById('read-to-text').innerText = letter.to || 'คุณคนพิเศษ';
@@ -1159,10 +1386,10 @@ function openReadView(letter) {
   document.getElementById('read-from-address').innerText = letter.fromAddress || '';
   document.getElementById('read-date').innerText = letter.date;
   document.getElementById('read-subject').innerText = letter.subject;
-  document.getElementById('read-content').innerText = letter.content;
+  document.getElementById('read-content').innerHTML = letter.contentHtml ? sanitizeLetterHtml(letter.contentHtml) : escapeHtml(String(letter.content || '')).replace(/\n/g, '<br>');
   document.getElementById('read-stamp-img').src = letter.stamp || '1.png';
-  document.getElementById('read-track-code').innerText = letter.trackingCode || 'DL-LEGACY';
-  document.getElementById('read-sheet-track').innerText = "TRACK: " + (letter.trackingCode || 'DL-LEGACY');
+  document.getElementById('read-track-code').innerText = getLetterCode(letter);
+  document.getElementById('read-sheet-track').innerText = "CODE: " + getLetterCode(letter);
 
   const readAdminArea = document.getElementById('read-admin-actions');
   if(isAdmin) {
@@ -1253,14 +1480,14 @@ function buildExportLetter() {
   root.innerHTML = `
     <div style="font-size:14px;letter-spacing:3px;color:#a36b84;font-weight:800;border-bottom:3px solid #d9b8c7;padding-bottom:15px;">DEARLY · DIGITAL LETTER</div>
     <h1 style="font-size:30px;line-height:1.45;margin:24px 0 12px;font-weight:700;">${esc(l.subject || '(ไม่มีหัวข้อ)')}</h1>
-    <div style="font-size:13px;color:#8c7b83;margin-bottom:24px;">วันที่ ${esc(l.date || '-')}　·　รหัสติดตาม ${esc(l.trackingCode || 'DL-LEGACY')}</div>
+    <div style="font-size:13px;color:#8c7b83;margin-bottom:24px;">วันที่ ${esc(l.date || '-')}　·　Code ${esc(getLetterCode(l))}</div>
     <div style="background:#fbf6f8;border:1px solid #eadce2;border-radius:14px;padding:20px 22px;margin-bottom:30px;font-size:14px;">
       <div style="margin:4px 0;"><b style="color:#80576b;">ถึง:</b> ${esc(l.to)}</div>
       <div style="margin:4px 0;"><b style="color:#80576b;">ที่อยู่ผู้รับ:</b> ${esc(l.toAddress)}</div>
       <div style="margin:4px 0;"><b style="color:#80576b;">จาก:</b> ${esc(l.from)}</div>
       <div style="margin:4px 0;"><b style="color:#80576b;">ที่อยู่ผู้ส่ง:</b> ${esc(l.fromAddress)}</div>
     </div>
-    <div style="font-size:16px;line-height:2.05;white-space:pre-wrap;overflow-wrap:break-word;word-break:normal;">${esc(l.content || '')}</div>
+    <div class="letter-rich-content" style="font-size:16px;line-height:2.05;overflow-wrap:break-word;word-break:normal;">${l.contentHtml ? sanitizeLetterHtml(l.contentHtml) : esc(l.content || '').replace(/\n/g, '<br>')}</div>
     <div style="margin-top:42px;padding-top:14px;border-top:1px solid #eadce2;color:#8c7b83;font-size:11px;">จดหมายฉบับนี้ส่งออกจาก DEARLY</div>`;
   document.body.appendChild(root);
   return root;
@@ -1409,6 +1636,7 @@ function installImageFallbacks() {
 installImageFallbacks();
 window.onload = () => {
   renderSwatches();
+  if (FIXED_WAX_IMAGE) { const seal = document.getElementById('preview-wax-seal'); if (seal) { seal.classList.add('has-art'); seal.innerHTML = `<img class="wax-art-img" src="${FIXED_WAX_IMAGE}" alt="DEARLY Wax Seal">`; } }
   checkAdminUI();
   listenToDatabase();
   go('home');
